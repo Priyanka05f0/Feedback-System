@@ -17,8 +17,8 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('edupulse_clean') {
-                    // Removed -DskipTests so JaCoCo can record coverage
-                    // 'verify' runs the build and the unit tests
+                    // Running 'verify' instead of 'package' ensures unit tests run 
+                    // and JaCoCo generates the coverage report for SonarQube.
                     bat 'mvn clean verify'
                 }
             }
@@ -26,7 +26,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // 'SonarServer' must match the name in Manage Jenkins > System
+                // Ensure 'SonarServer' matches the name in your Jenkins System Configuration
                 withSonarQubeEnv('SonarServer') {
                     dir('edupulse_clean') {
                         bat 'mvn sonar:sonar'
@@ -37,7 +37,7 @@ pipeline {
         
         stage('Archive Artifacts') {
             steps {
-                // Saves the JAR file in Jenkins so you can download it later
+                // Saves the JAR file inside Jenkins so you have a backup of the build
                 archiveArtifacts artifacts: 'edupulse_clean/target/*.jar', allowEmptyArchive: true
             }
         }
@@ -45,10 +45,10 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Deploying to AWS EC2 Instance...'
-                    // We use 'wsl' to call the Ansible you installed in Ubuntu
-                    // 'hosts' is your inventory and 'deploy.yml' is your playbook
-                    bat 'wsl ansible-playbook -i hosts deploy.yml'
+                    echo 'Deploying to AWS EC2 Instance via WSL...'
+                    // Using the absolute path you found: /usr/bin/ansible-playbook
+                    // This ensures Jenkins finds the command every time.
+                    bat 'wsl ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml'
                 }
             }
         }
@@ -57,9 +57,10 @@ pipeline {
     post {
         success {
             echo 'Congratulations Pinky! The entire pipeline finished successfully.'
+            echo 'Your app should be live at: http://100.31.148.55:8087'
         }
         failure {
-            echo 'The pipeline failed. Check the Console Output to see which stage had an error.'
+            echo 'The pipeline failed. Check the Console Output to see the error details.'
         }
     }
 }
