@@ -1,21 +1,24 @@
 ---
-- name: Deploy EduPulse to AWS EC2
+- name: Deploy EduPulse with Database
   hosts: ec2_server
   become: yes
   tasks:
     - name: Update apt cache
-      apt:
-        update_cache: yes
+      apt: update_cache=yes
 
-    - name: Install Java 17
+    - name: Install Java 17 and MySQL
       apt:
-        name: openjdk-17-jre-headless
+        name: 
+          - openjdk-17-jre-headless
+          - psmisc
+          - mysql-server
         state: present
 
-    - name: Ensure psmisc is installed (for fuser command)
-      apt:
-        name: psmisc
-        state: present
+    - name: Ensure MySQL is running
+      service:
+        name: mysql
+        state: started
+        enabled: yes
 
     - name: Copy JAR file to EC2
       copy:
@@ -27,7 +30,6 @@
       shell: "fuser -k 8087/tcp || true"
 
     - name: Start the Application
-      # nohup keeps it running after logout; & puts it in background; 2>&1 redirects errors to log
       shell: "nohup java -jar /home/ubuntu/edupulse.jar > /home/ubuntu/app.log 2>&1 &"
       async: 60
       poll: 0
