@@ -40,11 +40,11 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Executing Ansible via WSL...'
+                    echo 'Executing Ansible via WSL using sh (stable)...'
                     
-                    // ✅ FIXED COMMAND (NO /usr/bin/bash)
+                    // ✅ FINAL FIX (NO bash issues anymore)
                     bat '''
-                    wsl bash -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Feedback-Pipeline/edupulse_clean && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts deploy.yml"
+                    wsl -e sh -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Feedback-Pipeline/edupulse_clean && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts deploy.yml"
                     '''
                 }
             }
@@ -53,11 +53,11 @@ pipeline {
     
     post {
         success {
-            echo 'Congratulations Pinky! The entire pipeline finished successfully.'
-            echo 'Your EduPulse app is live at: http://100.31.148.55:8087'
+            echo '🎉 Congratulations Pinky! The entire pipeline finished successfully.'
+            echo '🌐 Your EduPulse app is live at: http://100.31.148.55:8087'
         }
         failure {
-            echo 'The pipeline failed. Check the Console Output!'
+            echo '❌ The pipeline failed. Check the Console Output!'
         }
     }
 }
