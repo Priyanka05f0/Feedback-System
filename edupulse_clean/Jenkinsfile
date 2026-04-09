@@ -42,10 +42,7 @@ pipeline {
                 dir('edupulse_clean') {
                     echo 'Executing Ansible via WSL using sh (stable)...'
                     
-                    // ✅ FINAL FIX (NO bash issues anymore)
-                    bat '''
-                    wsl -e sh -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Feedback-Pipeline/edupulse_clean && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts deploy.yml"
-                    '''
+                    bat 'wsl -e sh -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Feedback-Pipeline/edupulse_clean && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts deploy.yml"'
                 }
             }
         }
