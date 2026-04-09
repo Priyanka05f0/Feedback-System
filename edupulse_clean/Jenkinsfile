@@ -9,13 +9,16 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // Pulls the latest code from your GitHub repository
                 checkout scm
             }
         }
         
         stage('Build & Test') {
             steps {
+                // 'edupulse_clean' is the folder name on your GitHub
                 dir('edupulse_clean') {
+                    // 'verify' ensures unit tests run and coverage is recorded
                     bat 'mvn clean verify'
                 }
             }
@@ -33,6 +36,7 @@ pipeline {
         
         stage('Archive Artifacts') {
             steps {
+                // Saves the JAR file inside Jenkins
                 archiveArtifacts artifacts: 'edupulse_clean/target/*.jar', allowEmptyArchive: true
             }
         }
@@ -40,9 +44,12 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Executing Ansible via WSL using sh (stable)...'
-                    
-                    bat 'wsl -e sh -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Feedback-Pipeline/edupulse_clean && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts deploy.yml"'
+                    echo 'Deploying to AWS via Explicit Ubuntu WSL Bridge...'
+                    /* -d Ubuntu: Forces Windows to use your specific Linux install.
+                       sh -c: Uses the standard shell to execute the command.
+                       ANSIBLE_HOST_KEY_CHECKING=False: Prevents the pipeline from hanging on SSH prompts.
+                    */
+                    bat 'wsl -d Ubuntu sh -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
                 }
             }
         }
@@ -50,11 +57,11 @@ pipeline {
     
     post {
         success {
-            echo '🎉 Congratulations Pinky! The entire pipeline finished successfully.'
-            echo '🌐 Your EduPulse app is live at: http://100.31.148.55:8087'
+            echo 'Congratulations Pinky! The entire pipeline finished successfully.'
+            echo 'Your app is live at: http://100.31.148.55:8087'
         }
         failure {
-            echo '❌ The pipeline failed. Check the Console Output!'
+            echo 'The pipeline failed. Check the Console Output for details.'
         }
     }
 }
