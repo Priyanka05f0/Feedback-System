@@ -17,7 +17,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('edupulse_clean') {
-                    // Running 'verify' generates the coverage report for SonarQube
+                    // Running 'verify' ensures tests run and coverage is recorded
                     bat 'mvn clean verify'
                 }
             }
@@ -42,9 +42,12 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Executing Ansible Playbook via WSL...'
-                    // Added Host Key Checking bypass to ensure a smooth connection
-                    bat 'wsl ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml'
+                    echo 'Executing Ansible via WSL Login Shell...'
+                    /* We use '-u ubuntu' to act as your Linux user.
+                       We use 'bash -c' to ensure the Linux shell handles the environment variables 
+                       and paths correctly, which stops the "not found" error.
+                    */
+                    bat 'wsl -u ubuntu bash -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
                 }
             }
         }
