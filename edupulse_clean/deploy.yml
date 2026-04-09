@@ -1,24 +1,33 @@
+---
 - name: Deploy EduPulse to AWS EC2
   hosts: ec2_server
   become: yes
   tasks:
     - name: Update apt cache
-      apt: update_cache=yes
+      apt:
+        update_cache: yes
 
     - name: Install Java 17
       apt:
         name: openjdk-17-jre-headless
         state: present
 
+    - name: Ensure psmisc is installed (for fuser command)
+      apt:
+        name: psmisc
+        state: present
+
     - name: Copy JAR file to EC2
       copy:
         src: ./target/edupulse-1.0.0.jar
         dest: /home/ubuntu/edupulse.jar
+        mode: '0755'
 
     - name: Kill any existing process on port 8087
       shell: "fuser -k 8087/tcp || true"
 
     - name: Start the Application
+      # nohup keeps it running after logout; & puts it in background; 2>&1 redirects errors to log
       shell: "nohup java -jar /home/ubuntu/edupulse.jar > /home/ubuntu/app.log 2>&1 &"
       async: 60
       poll: 0
