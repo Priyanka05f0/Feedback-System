@@ -2,6 +2,8 @@ pipeline {
     agent any
     
     tools {
+        // IMPORTANT: Make sure these names match exactly what you 
+        // typed in "Manage Jenkins" -> "Tools"
         maven 'csemaven'
         jdk 'JDK-21'
     }
@@ -17,21 +19,27 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building application...'
-                bat 'mvn clean package -DskipTests'
+                // Tell Jenkins to look inside the folder for the pom.xml
+                dir('edupulse_clean') {
+                    bat 'mvn clean package -DskipTests'
+                }
             }
         }
         
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                bat 'mvn test'
+                dir('edupulse_clean') {
+                    bat 'mvn test'
+                }
             }
         }
         
         stage('Archive') {
             steps {
                 echo 'Saving JAR file...'
-                archiveArtifacts artifacts: 'target/*.jar'
+                // Adjust the path to where the JAR actually is
+                archiveArtifacts artifacts: 'edupulse_clean/target/*.jar'
             }
         }
     }
