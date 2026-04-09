@@ -9,15 +9,14 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pulls the latest code from your GitHub repository
                 checkout scm
             }
         }
         
         stage('Build & Test') {
             steps {
+                // Based on your GitHub screenshot, the pom.xml is in this folder
                 dir('edupulse_clean') {
-                    // 'verify' runs the build and generates the JaCoCo coverage report
                     bat 'mvn clean verify'
                 }
             }
@@ -35,7 +34,6 @@ pipeline {
         
         stage('Archive Artifacts') {
             steps {
-                // Keep the JAR file in Jenkins for safe keeping
                 archiveArtifacts artifacts: 'edupulse_clean/target/*.jar', allowEmptyArchive: true
             }
         }
@@ -43,11 +41,11 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Executing Ansible via default WSL environment...'
-                    /* We removed '-u ubuntu' to avoid the "User not found" error. 
-                       WSL will now use your default login automatically.
+                    echo 'Executing Ansible via absolute WSL paths...'
+                    /* We are now using /bin/bash instead of just 'bash'.
+                       This ensures WSL finds the shell even if the PATH is empty.
                     */
-                    bat 'wsl bash -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
+                    bat 'wsl /bin/bash -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
                 }
             }
         }
@@ -56,7 +54,7 @@ pipeline {
     post {
         success {
             echo 'Congratulations Pinky! The entire pipeline finished successfully.'
-            echo 'Your EduPulse app is live at: http://100.31.148.55:8087'
+            echo 'Access your app here: http://100.31.148.55:8087'
         }
         failure {
             echo 'The pipeline failed. Check the Console Output to see the error details.'
