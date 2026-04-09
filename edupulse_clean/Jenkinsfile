@@ -16,9 +16,8 @@ pipeline {
         
         stage('Build & Test') {
             steps {
-                dir('edupulse_clean_edupulse_clean') {
-                    // Running 'verify' instead of 'package' ensures unit tests run 
-                    // and JaCoCo generates the coverage report for SonarQube.
+                dir('edupulse_clean') {
+                    // Running 'verify' generates the coverage report for SonarQube
                     bat 'mvn clean verify'
                 }
             }
@@ -26,9 +25,8 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Ensure 'SonarServer' matches the name in your Jenkins System Configuration
                 withSonarQubeEnv('SonarServer') {
-                    dir('edupulse_clean_edupulse_clean') {
+                    dir('edupulse_clean') {
                         bat 'mvn sonar:sonar'
                     }
                 }
@@ -37,17 +35,15 @@ pipeline {
         
         stage('Archive Artifacts') {
             steps {
-                // Saves the JAR file inside Jenkins so you have a backup of the build
                 archiveArtifacts artifacts: 'edupulse_clean/target/*.jar', allowEmptyArchive: true
             }
         }
 
         stage('Deploy to AWS with Ansible') {
             steps {
-                dir('edupulse_clean_edupulse_clean') {
-                    echo 'Deploying to AWS EC2 Instance via WSL...'
-                    // Using the absolute path you found: /usr/bin/ansible-playbook
-                    // This ensures Jenkins finds the command every time.
+                dir('edupulse_clean') {
+                    echo 'Executing Ansible Playbook via WSL...'
+                    // Added Host Key Checking bypass to ensure a smooth connection
                     bat 'wsl ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml'
                 }
             }
@@ -57,7 +53,7 @@ pipeline {
     post {
         success {
             echo 'Congratulations Pinky! The entire pipeline finished successfully.'
-            echo 'Your app should be live at: http://100.31.148.55:8087'
+            echo 'Access your app here: http://100.31.148.55:8087'
         }
         failure {
             echo 'The pipeline failed. Check the Console Output to see the error details.'
