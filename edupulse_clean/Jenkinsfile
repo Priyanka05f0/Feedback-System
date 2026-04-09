@@ -5,7 +5,7 @@ pipeline {
         // IMPORTANT: Make sure these names match exactly what you 
         // typed in "Manage Jenkins" -> "Tools"
         maven 'csemaven'
-        jdk 'JDK-21'
+        jdk 'csejava'
     }
     
     stages {
