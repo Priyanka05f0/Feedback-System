@@ -17,7 +17,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 dir('edupulse_clean') {
-                    // Running 'verify' ensures tests run and coverage is recorded
+                    // 'verify' runs the build and generates the JaCoCo coverage report
                     bat 'mvn clean verify'
                 }
             }
@@ -35,6 +35,7 @@ pipeline {
         
         stage('Archive Artifacts') {
             steps {
+                // Keep the JAR file in Jenkins for safe keeping
                 archiveArtifacts artifacts: 'edupulse_clean/target/*.jar', allowEmptyArchive: true
             }
         }
@@ -42,12 +43,11 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Executing Ansible via WSL Login Shell...'
-                    /* We use '-u ubuntu' to act as your Linux user.
-                       We use 'bash -c' to ensure the Linux shell handles the environment variables 
-                       and paths correctly, which stops the "not found" error.
+                    echo 'Executing Ansible via default WSL environment...'
+                    /* We removed '-u ubuntu' to avoid the "User not found" error. 
+                       WSL will now use your default login automatically.
                     */
-                    bat 'wsl -u ubuntu bash -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
+                    bat 'wsl bash -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
                 }
             }
         }
@@ -56,7 +56,7 @@ pipeline {
     post {
         success {
             echo 'Congratulations Pinky! The entire pipeline finished successfully.'
-            echo 'Access your app here: http://100.31.148.55:8087'
+            echo 'Your EduPulse app is live at: http://100.31.148.55:8087'
         }
         failure {
             echo 'The pipeline failed. Check the Console Output to see the error details.'
