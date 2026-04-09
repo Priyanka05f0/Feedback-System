@@ -9,21 +9,24 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                // Pulls the latest code from your GitHub repository
                 checkout scm
             }
         }
         
-        stage('Build') {
+        stage('Build & Test') {
             steps {
                 dir('edupulse_clean') {
-                    bat 'mvn clean package -DskipTests'
+                    // Removed -DskipTests so JaCoCo can record coverage
+                    // 'verify' runs the build and the unit tests
+                    bat 'mvn clean verify'
                 }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                // This name 'SonarServer' must match what you typed in Step 3
+                // 'SonarServer' must match the name in Manage Jenkins > System
                 withSonarQubeEnv('SonarServer') {
                     dir('edupulse_clean') {
                         bat 'mvn sonar:sonar'
@@ -32,10 +35,31 @@ pipeline {
             }
         }
         
-        stage('Archive') {
+        stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: 'edupulse_clean/target/*.jar'
+                // Saves the JAR file in Jenkins so you can download it later
+                archiveArtifacts artifacts: 'edupulse_clean/target/*.jar', allowEmptyArchive: true
             }
+        }
+
+        stage('Deploy to AWS with Ansible') {
+            steps {
+                dir('edupulse_clean') {
+                    echo 'Deploying to AWS EC2 Instance...'
+                    // We use 'wsl' to call the Ansible you installed in Ubuntu
+                    // 'hosts' is your inventory and 'deploy.yml' is your playbook
+                    bat 'wsl ansible-playbook -i hosts deploy.yml'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            echo 'Congratulations Pinky! The entire pipeline finished successfully.'
+        }
+        failure {
+            echo 'The pipeline failed. Check the Console Output to see which stage had an error.'
         }
     }
 }
