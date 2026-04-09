@@ -16,7 +16,7 @@ pipeline {
         
         stage('Build & Test') {
             steps {
-                dir('edupulse_clean') {
+                dir('edupulse_clean_edupulse_clean') {
                     // Running 'verify' instead of 'package' ensures unit tests run 
                     // and JaCoCo generates the coverage report for SonarQube.
                     bat 'mvn clean verify'
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 // Ensure 'SonarServer' matches the name in your Jenkins System Configuration
                 withSonarQubeEnv('SonarServer') {
-                    dir('edupulse_clean') {
+                    dir('edupulse_clean_edupulse_clean') {
                         bat 'mvn sonar:sonar'
                     }
                 }
@@ -44,7 +44,7 @@ pipeline {
 
         stage('Deploy to AWS with Ansible') {
             steps {
-                dir('edupulse_clean') {
+                dir('edupulse_clean_edupulse_clean') {
                     echo 'Deploying to AWS EC2 Instance via WSL...'
                     // Using the absolute path you found: /usr/bin/ansible-playbook
                     // This ensures Jenkins finds the command every time.
