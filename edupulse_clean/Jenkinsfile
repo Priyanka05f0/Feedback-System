@@ -9,14 +9,12 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Pulls the code from your GitHub: https://github.com/Priyanka05f0/Feedback-System.git
                 checkout scm
             }
         }
         
         stage('Build & Test') {
             steps {
-                // Based on your GitHub, the pom.xml is inside this folder
                 dir('edupulse_clean') {
                     bat 'mvn clean verify'
                 }
@@ -42,12 +40,12 @@ pipeline {
         stage('Deploy to AWS with Ansible') {
             steps {
                 dir('edupulse_clean') {
-                    echo 'Executing Ansible via verified WSL bash path...'
-                    /* 1. We use /usr/bin/bash because that's what your system confirmed.
-                       2. We use -c to run the Linux command inside quotes.
-                       3. We bypass host key checking to avoid the pipeline getting stuck on a "Yes/No" prompt.
-                    */
-                    bat 'wsl /usr/bin/bash -c "ANSIBLE_HOST_KEY_CHECKING=False /usr/bin/ansible-playbook -i hosts deploy.yml"'
+                    echo 'Executing Ansible via WSL...'
+                    
+                    // ✅ FIXED COMMAND (NO /usr/bin/bash)
+                    bat '''
+                    wsl bash -c "cd /mnt/c/ProgramData/Jenkins/.jenkins/workspace/Feedback-Pipeline/edupulse_clean && ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i hosts deploy.yml"
+                    '''
                 }
             }
         }
@@ -59,7 +57,7 @@ pipeline {
             echo 'Your EduPulse app is live at: http://100.31.148.55:8087'
         }
         failure {
-            echo 'The pipeline failed. Check the Console Output for Build #12!'
+            echo 'The pipeline failed. Check the Console Output!'
         }
     }
 }
