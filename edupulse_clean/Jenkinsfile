@@ -2,8 +2,6 @@ pipeline {
     agent any
     
     tools {
-        // IMPORTANT: Make sure these names match exactly what you 
-        // typed in "Manage Jenkins" -> "Tools"
         maven 'csemaven'
         jdk 'csejava'
     }
@@ -11,45 +9,33 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Cloning repository...'
                 checkout scm
             }
         }
         
         stage('Build') {
             steps {
-                echo 'Building application...'
-                // Tell Jenkins to look inside the folder for the pom.xml
                 dir('edupulse_clean') {
                     bat 'mvn clean package -DskipTests'
                 }
             }
         }
-        
-        stage('Test') {
+
+        stage('SonarQube Analysis') {
             steps {
-                echo 'Running tests...'
-                dir('edupulse_clean') {
-                    bat 'mvn test'
+                // This name 'SonarServer' must match what you typed in Step 3
+                withSonarQubeEnv('SonarServer') {
+                    dir('edupulse_clean') {
+                        bat 'mvn sonar:sonar'
+                    }
                 }
             }
         }
         
         stage('Archive') {
             steps {
-                echo 'Saving JAR file...'
-                // Adjust the path to where the JAR actually is
                 archiveArtifacts artifacts: 'edupulse_clean/target/*.jar'
             }
-        }
-    }
-    
-    post {
-        success {
-            echo 'Build successful!'
-        }
-        failure {
-            echo 'Build failed!'
         }
     }
 }
