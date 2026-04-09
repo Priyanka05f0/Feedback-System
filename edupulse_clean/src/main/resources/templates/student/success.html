@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduPulse — Feedback Submitted Successfully</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #F7F3EE;
+      --bg2: #EDE8E1;
+      --surface: #FFFFFF;
+      --surface2: #F2EDE6;
+      --text: #1A120B;
+      --text2: #5C4A3A;
+      --text3: #9C8A7A;
+      --accent: #3D1F0F;
+      --accent2: #7B4225;
+      --accent3: #C4732A;
+      --border: rgba(61,31,15,0.12);
+      --border2: rgba(61,31,15,0.22);
+      --glow: rgba(196,115,42,0.18);
+      --success: #0CA678;
+      --success-dark: #099268;
+      --shadow: 0 20px 60px rgba(61,31,15,0.12), 0 4px 16px rgba(61,31,15,0.06);
+      --card-shadow: 0 32px 80px rgba(61,31,15,0.16), 0 8px 24px rgba(61,31,15,0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0E0A07;
+      --bg2: #160E08;
+      --surface: #1E1208;
+      --surface2: #251609;
+      --text: #F5EBE0;
+      --text2: #C4A882;
+      --text3: #7A6050;
+      --accent: #F5EBE0;
+      --accent2: #E8C99A;
+      --accent3: #D4872E;
+      --border: rgba(245,235,224,0.08);
+      --border2: rgba(245,235,224,0.15);
+      --glow: rgba(212,135,46,0.25);
+      --shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 16px rgba(0,0,0,0.3);
+      --card-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.4s, color 0.4s;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated Background */
+    .bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: rgba(12,166,120,0.08);
+      top: -100px;
+      left: -150px;
+      animation: drift1 18s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: 500px;
+      height: 500px;
+      background: rgba(196,115,42,0.06);
+      bottom: -100px;
+      right: -100px;
+      animation: drift2 22s ease-in-out infinite alternate;
+    }
+    .orb-3 {
+      width: 400px;
+      height: 400px;
+      background: rgba(12,166,120,0.05);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: drift3 15s ease-in-out infinite alternate;
+    }
+    @keyframes drift1 {
+      0% { transform: translate(0,0) scale(1); }
+      100% { transform: translate(80px, 60px) scale(1.15); }
+    }
+    @keyframes drift2 {
+      0% { transform: translate(0,0) scale(1); }
+      100% { transform: translate(-60px, -80px) scale(1.1); }
+    }
+    @keyframes drift3 {
+      0% { transform: translate(-50%,-50%) scale(1); }
+      100% { transform: translate(-42%,-44%) scale(1.2); }
+    }
+
+    /* Navigation */
+    .success-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 64px;
+      background: rgba(247,243,238,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.4s;
+    }
+    [data-theme="dark"] .success-nav {
+      background: rgba(14,10,7,0.85);
+    }
+    .success-nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .logo-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent2), var(--accent3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .logo-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      transition: color 0.4s;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .theme-toggle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+    .theme-toggle:hover {
+      background: var(--glow);
+      transform: scale(1.08);
+    }
+    .btn-login {
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      transition: all 0.25s;
+    }
+    .btn-login:hover {
+      background: var(--accent2);
+      color: #fff;
+    }
+
+    /* Success Container */
+    .success-container {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 88px 24px 48px;
+    }
+
+    /* Success Card - Matching Home Template */
+    .success-card {
+      max-width: 520px;
+      width: 100%;
+      background: var(--surface);
+      border-radius: 32px;
+      padding: 56px 48px;
+      text-align: center;
+      border: 1px solid var(--border2);
+      box-shadow: var(--card-shadow);
+      animation: slideUp 0.6s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+      position: relative;
+      overflow: hidden;
+    }
+    .success-card::before {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(12,166,120,0.08), transparent);
+      pointer-events: none;
+    }
+    .success-card::after {
+      content: '';
+      position: absolute;
+      bottom: -60px;
+      left: -60px;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(196,115,42,0.06), transparent);
+      pointer-events: none;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Success Icon */
+    .success-icon {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--success), var(--success-dark));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 28px;
+      position: relative;
+      animation: pulseScale 0.5s 0.3s cubic-bezier(0.34, 1.5, 0.64, 1) both;
+    }
+    .success-icon::before {
+      content: '';
+      position: absolute;
+      inset: -8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--success), var(--success-dark));
+      opacity: 0.3;
+      animation: ripple 1.5s ease-out infinite;
+    }
+    .success-icon svg {
+      width: 48px;
+      height: 48px;
+      stroke: #fff;
+      stroke-width: 2.5;
+      fill: none;
+      animation: checkmark 0.4s 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
+    }
+
+    @keyframes pulseScale {
+      0% {
+        transform: scale(0);
+        opacity: 0;
+      }
+      60% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes ripple {
+      0% {
+        transform: scale(1);
+        opacity: 0.3;
+      }
+      100% {
+        transform: scale(1.8);
+        opacity: 0;
+      }
+    }
+
+    @keyframes checkmark {
+      0% {
+        stroke-dashoffset: 100;
+        opacity: 0;
+      }
+      100% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+      }
+    }
+
+    /* Success Content */
+    .success-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      background: linear-gradient(135deg, var(--success), var(--success-dark));
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      border-radius: 30px;
+      margin-bottom: 20px;
+    }
+    .success-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .success-message {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text2);
+      margin-bottom: 32px;
+    }
+    .success-message p {
+      margin-bottom: 8px;
+    }
+    .success-message p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Redirect Timer */
+    .redirect-timer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--surface2);
+      border-radius: 60px;
+      margin-bottom: 28px;
+      border: 1px solid var(--border);
+    }
+    .timer-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent2), var(--accent3));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      font-family: 'Playfair Display', serif;
+    }
+    .timer-text {
+      font-size: 13px;
+      color: var(--text2);
+    }
+    .timer-text strong {
+      color: var(--accent3);
+      font-weight: 700;
+    }
+
+    /* Button */
+    .btn-home {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 32px;
+      border-radius: 40px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      text-decoration: none;
+      transition: all 0.25s;
+      background: linear-gradient(135deg, var(--accent2), var(--accent3));
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn-home:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px var(--glow);
+    }
+
+    /* Particle effects */
+    .particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--success), var(--accent3));
+      opacity: 0;
+      animation: floatUp linear infinite;
+    }
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(0);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.6;
+      }
+      90% {
+        opacity: 0.3;
+      }
+      100% {
+        transform: translateY(-10vh) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .success-nav { padding: 0 20px; }
+      .success-card { padding: 40px 28px; margin: 0 16px; }
+      .success-title { font-size: 28px; }
+      .success-icon { width: 72px; height: 72px; }
+      .success-icon svg { width: 38px; height: 38px; }
+      .btn-home { padding: 10px 24px; font-size: 13px; }
+      .redirect-timer { padding: 12px 16px; }
+      .timer-circle { width: 34px; height: 34px; font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-canvas">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<div class="particles" id="particles"></div>
+
+<nav class="success-nav">
+  <a href="/" class="success-nav-logo">
+    <div class="logo-box">Ep</div>
+    <span class="logo-name">EduPulse</span>
+  </a>
+  <div class="nav-right">
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <a href="/login" class="btn-login">Staff Login</a>
+  </div>
+</nav>
+
+<div class="success-container">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12" />
+      </svg>
+    </div>
+    
+    <div class="success-badge">Submission Successful</div>
+    <h1 class="success-title">Thank You!</h1>
+    
+    <div class="success-message">
+      <p>Your feedback has been recorded successfully.</p>
+      <p>Your honest input helps shape better teaching and a</p>
+      <p>stronger learning environment for everyone.</p>
+    </div>
+
+    <div class="redirect-timer">
+      <div class="timer-circle" id="timerCount">5</div>
+      <div class="timer-text">
+        Redirecting to <strong>Home</strong> in <strong id="timerSeconds">5</strong> seconds
+      </div>
+    </div>
+
+    <a href="/" class="btn-home">
+      🏠 Return to Home
+    </a>
+  </div>
+</div>
+
+<script>
+  let countdown = 5;
+  const timerCountElement = document.getElementById('timerCount');
+  const timerSecondsElement = document.getElementById('timerSeconds');
+  
+  // Theme Toggle
+  function toggleTheme() {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    localStorage.setItem('ep-theme', html.getAttribute('data-theme'));
+    const btn = document.querySelector('.theme-toggle');
+    btn.textContent = isDark ? '🌙' : '☀️';
+  }
+
+  // Load saved theme
+  (function() {
+    const saved = localStorage.getItem('ep-theme');
+    if (saved) {
+      document.documentElement.setAttribute('data-theme', saved);
+      const btn = document.querySelector('.theme-toggle');
+      btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+    }
+  })();
+
+  // Generate floating particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.width = p.style.height = (Math.random() * 5 + 2) + 'px';
+    p.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    p.style.animationDelay = (Math.random() * 20) + 's';
+    container.appendChild(p);
+  }
+
+  // Countdown and redirect
+  const countdownInterval = setInterval(() => {
+    countdown--;
+    if (timerCountElement) timerCountElement.textContent = countdown;
+    if (timerSecondsElement) timerSecondsElement.textContent = countdown;
+    
+    if (countdown <= 0) {
+      clearInterval(countdownInterval);
+      window.location.href = '/';
+    }
+  }, 1000);
+</script>
+</body>
+</html>
