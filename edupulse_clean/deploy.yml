@@ -1,0 +1,8 @@
+- name: Deploy EduPulse Application
+  hosts: all
+  tasks:
+    - name: Run the Java application
+      # This runs your JAR in the background
+      shell: "nohup java -jar target/edupulse-1.0.0.jar > app.log 2>&1 &"
+      async: 60
+      poll: 0
