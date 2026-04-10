@@ -58,7 +58,7 @@ pipeline {
     post {
         success {
             echo 'Congratulations Pinky! The entire pipeline finished successfully.'
-            echo 'Your app is live at: http://100.31.148.55:8087'
+            echo 'Your app is live at: http://54.204.118.121'
         }
         failure {
             echo 'The pipeline failed. Check the Console Output for details.'
